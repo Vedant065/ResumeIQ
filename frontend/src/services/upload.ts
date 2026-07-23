@@ -1,13 +1,8 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-export const uploadResume = async (formData: FormData) => {
-  return axios.post(
-    `${API_URL}/analyze`,
-    formData
-  );
-};
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
 
 export async function uploadResume(
   file: File,
