@@ -362,10 +362,19 @@ def score_skills(text):
             missing_categories.append(category)
 
     # 6 categories available
-    score = round(
-        (categories_found / len(SKILL_CATEGORIES))
-        * SKILL_WEIGHT
-    )
+    # More realistic scoring
+    if categories_found >= 5:
+        score = 20
+    elif categories_found == 4:
+        score = 16
+    elif categories_found == 3:
+        score = 12
+    elif categories_found == 2:
+        score = 8
+    elif categories_found == 1:
+        score = 4
+    else:
+        score = 0
 
     suggestions = []
 
@@ -432,10 +441,12 @@ def score_experience(text):
 
     technologies = len(flatten_skills(extract_skills(experience)))
 
-    if technologies >= 5:
+    if technologies >= 3:
         score += 5
-    elif technologies >= 3:
+    elif technologies >= 2:
         score += 3
+    elif technologies >= 1:
+        score += 2
     else:
         suggestions.append(
             "Mention technologies used in your experience."
@@ -443,10 +454,12 @@ def score_experience(text):
 
     verbs = action_count(experience)
 
-    if verbs >= 8:
+    if verbs >= 4:
         score += 5
-    elif verbs >= 4:
+    elif verbs >= 2:
         score += 3
+    elif verbs >= 1:
+        score += 2
     else:
         suggestions.append(
             "Use action verbs in experience."
@@ -454,9 +467,9 @@ def score_experience(text):
 
     numbers = impact_count(experience)
 
-    if numbers >= 5:
+    if numbers >= 2:
         score += 5
-    elif numbers >= 2:
+    elif numbers >= 1:
         score += 3
     else:
         suggestions.append(
@@ -498,10 +511,12 @@ def score_projects(text):
 
     technologies = len(flatten_skills(extract_skills(projects)))
 
-    if technologies >= 6:
+    if technologies >= 3:
         score += 5
-    elif technologies >= 3:
+    elif technologies >= 2:
         score += 3
+    elif technologies >= 1:
+        score += 2
     else:
         suggestions.append(
             "Mention technologies used in projects."
@@ -509,17 +524,17 @@ def score_projects(text):
 
     verbs = action_count(projects)
 
-    if verbs >= 8:
+    if verbs >= 3:
         score += 5
-    elif verbs >= 4:
+    elif verbs >= 2:
         score += 3
+    elif verbs >= 1:
+        score += 2
 
     numbers = impact_count(projects)
 
-    if numbers >= 5:
+    if numbers >= 1:
         score += 5
-    elif numbers >= 2:
-        score += 3
 
     return {
         "score": score,
@@ -565,9 +580,9 @@ def score_formatting(text):
         re.findall(r"[•\-\*]", text)
     )
 
-    if bullet_points >= 10:
+    if bullet_points >= 5:
         score += 4
-    elif bullet_points >= 5:
+    elif bullet_points >= 3:
         score += 2
     else:
         suggestions.append(
@@ -583,7 +598,7 @@ def score_formatting(text):
 
     paragraphs = text.count("\n\n")
 
-    if paragraphs >= 3:
+    if paragraphs >= 2:
         score += 2
 
     return {
@@ -600,16 +615,16 @@ def score_length(text):
 
     words = word_count(text)
 
-    if 300 <= words <= 650:
+    if 250 <= words <= 700:
         score = 5
 
-    elif 250 <= words < 300:
+    elif 180 <= words < 250:
         score = 4
 
-    elif 180 <= words < 250:
+    elif 701 <= words <= 900:
         score = 3
 
-    elif words > 650:
+    elif 100 <= words < 180:
         score = 2
 
     else:
