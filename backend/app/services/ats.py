@@ -426,14 +426,11 @@ def score_experience(text):
         text,
         ["experience", "internship", "work experience"]
     )
-
-    text_lower = experience.lower()
-
+    
     score = 0
     suggestions = []
-
-    if any(word in text_lower for word in
-           ["experience", "internship", "work experience"]):
+    
+    if experience.strip():
         score += 5
     else:
         suggestions.append("Add internship or work experience.")
@@ -498,15 +495,11 @@ def score_projects(text):
     score = 0
     suggestions = []
 
-    project_mentions = text_lower.count("project")
-
-    if project_mentions >= 2:
+    if projects.strip():
         score += 5
-    elif project_mentions == 1:
-        score += 3
     else:
         suggestions.append(
-            "Include at least two technical projects."
+            "Include at least one technical project."
         )
 
     technologies = len(flatten_skills(extract_skills(projects)))
