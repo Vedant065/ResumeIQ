@@ -288,24 +288,45 @@ Results Dashboard
 
 ---
 
-# 📸 Screenshots
+## 📸 Screenshots
 
-Add screenshots here.
+### 🏠 Home Page
 
-Example:
+The landing page where users can upload their resume and provide a job description for analysis.
 
-```
-screenshots/
+![Home Page](screenshots/home.png)
 
-Home Page
+---
 
-Upload Resume
+### 📄 Resume Upload
 
-ATS Dashboard
+Users can upload a PDF resume and enter a job description to start the analysis.
 
-Job Match
+![Resume Upload](screenshots/upload.png)
 
-AI Feedback
+---
+
+### 📊 ATS Analysis Dashboard
+
+Displays the ATS score, section-wise evaluation, strengths, weaknesses, and improvement suggestions.
+
+![ATS Dashboard](screenshots/dashboard.png)
+
+---
+
+### 💼 Job Match Analysis
+
+Compares the resume against the provided job description and highlights the match score, matched skills, and missing skills.
+
+![Job Match](screenshots/jobmatch.png)
+
+---
+
+### 🤖 AI Resume Feedback
+
+Provides personalized AI-generated recommendations to improve the resume using Google Gemini.
+
+![AI Feedback](screenshots/feedback.png)
 ```
 
 ---
