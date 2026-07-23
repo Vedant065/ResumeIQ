@@ -684,7 +684,7 @@ def calculate_ats_score(text: str):
     print("Formatting:", formatting["score"])
     print("Length:", length["score"])
     print("Final:", score)
-    score = min(100, score)
+    
 
     # -------------------------------
     # Rating
