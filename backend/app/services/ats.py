@@ -1079,3 +1079,194 @@ def get_rating(score):
         return "Needs Improvement"
 
     return "Poor"
+# ==========================================================
+# MAIN ATS FUNCTION
+# ==========================================================
+
+def calculate_ats_score(text: str):
+
+    # -----------------------------
+    # Run all scoring modules
+    # -----------------------------
+
+    contact = score_contact_information(text)
+
+    structure = score_resume_structure(text)
+
+    readability = score_readability(text)
+
+    skills = score_skills(text)
+
+    verbs = score_action_verbs(text)
+
+    achievements = score_achievements(text)
+
+    experience = score_experience(text)
+
+    projects = score_projects(text)
+
+    formatting = score_formatting(text)
+
+    quality = score_resume_quality(text)
+
+    # -----------------------------
+    # Weighted Final Score
+    # -----------------------------
+
+    final_score = (
+        contact["score"] +
+        structure["score"] +
+        readability["score"] +
+        skills["score"] +
+        verbs["score"] +
+        achievements["score"] +
+        experience["score"] +
+        projects["score"] +
+        formatting["score"] +
+        quality["score"]
+    )
+
+    # Raw total is 115
+    # Convert fairly to 100
+
+    final_score = round((final_score / 115) * 100)
+
+    # -----------------------------
+    # Soft Normalization
+    # -----------------------------
+
+    if final_score > 95:
+        final_score = 95
+
+    elif final_score < 0:
+        final_score = 0
+
+    # -----------------------------
+    # Merge Strengths
+    # -----------------------------
+
+    strengths = []
+
+    for module in [
+        contact,
+        structure,
+        readability,
+        skills,
+        verbs,
+        achievements,
+        experience,
+        projects,
+        formatting,
+        quality
+    ]:
+
+        strengths.extend(module.get("strengths", []))
+
+    strengths = list(dict.fromkeys(strengths))
+
+    # -----------------------------
+    # Merge Suggestions
+    # -----------------------------
+
+    suggestions = []
+
+    for module in [
+        contact,
+        structure,
+        readability,
+        skills,
+        verbs,
+        achievements,
+        experience,
+        projects,
+        formatting,
+        quality
+    ]:
+
+        suggestions.extend(module.get("suggestions", []))
+
+    suggestions = list(dict.fromkeys(suggestions))
+
+    # -----------------------------
+    # Missing Keywords
+    # -----------------------------
+
+    missing_keywords = skills["missing_keywords"][:10]
+
+    # -----------------------------
+    # Rating
+    # -----------------------------
+
+    rating = get_rating(final_score)
+
+    # -----------------------------
+    # ATS Verdict
+    # -----------------------------
+
+    if final_score >= 90:
+
+        verdict = "Excellent ATS Compatibility"
+
+    elif final_score >= 80:
+
+        verdict = "Very Good ATS Compatibility"
+
+    elif final_score >= 70:
+
+        verdict = "Good ATS Compatibility"
+
+    elif final_score >= 60:
+
+        verdict = "Average ATS Compatibility"
+
+    else:
+
+        verdict = "Needs Improvement"
+
+    # -----------------------------
+    # Return
+    # -----------------------------
+
+    return {
+
+        "score": final_score,
+
+        "rating": rating,
+
+        "verdict": verdict,
+
+        "keywords": skills["keywords_found"],
+
+        "missing_keywords": missing_keywords,
+
+        "strengths": strengths,
+
+        "suggestions": suggestions,
+
+        "section_analysis": structure["analysis"],
+
+        "breakdown": {
+
+            "Contact": contact["score"],
+
+            "Structure": structure["score"],
+
+            "Readability": readability["score"],
+
+            "Skills": skills["score"],
+
+            "Action Verbs": verbs["score"],
+
+            "Achievements": achievements["score"],
+
+            "Experience": experience["score"],
+
+            "Projects": projects["score"],
+
+            "Formatting": formatting["score"],
+
+            "Resume Quality": quality["score"]
+
+        }
+
+    }
