@@ -757,54 +757,38 @@ def calculate_ats_score(text: str):
 
     section_analysis = []
 
-        for section, present in sections["analysis"].items():
-    
-            section_analysis.append({
-    
-                "name": section,
-    
-                "present": present
-    
-            })
-    
         # -------------------------------
-        # Result
-        # -------------------------------
-    
-        return {
-    
-            "score": score,
-    
-            "rating": rating,
-    
-            "keywords": skills["keywords"],
-    
-            "missing_keywords": skills["missing"],
-    
-            "strengths": strengths,
-    
-            "suggestions": suggestions,
-    
-            "section_analysis": section_analysis,
-    
-            "breakdown": {
-    
-                "Contact": contact["score"],
-    
-                "Sections": sections["score"],
-    
-                "Skills": skills["score"],
-    
-                "Experience": experience["score"],
-    
-                "Projects": projects["score"],
-    
-                "Achievements": achievements["score"],
-    
-                "Formatting": formatting["score"],
-    
-                "Length": length["score"]
-    
-            }
-    
+    # Section Analysis
+    # -------------------------------
+
+    section_analysis = []
+
+    for section, present in sections["analysis"].items():
+        section_analysis.append({
+            "name": section,
+            "present": present
+        })
+
+    # -------------------------------
+    # Result
+    # -------------------------------
+
+    return {
+        "score": score,
+        "rating": rating,
+        "keywords": skills["keywords"],
+        "missing_keywords": skills["missing"],
+        "strengths": strengths,
+        "suggestions": suggestions,
+        "section_analysis": section_analysis,
+        "breakdown": {
+            "Contact": contact["score"],
+            "Sections": sections["score"],
+            "Skills": skills["score"],
+            "Experience": experience["score"],
+            "Projects": projects["score"],
+            "Achievements": achievements["score"],
+            "Formatting": formatting["score"],
+            "Length": length["score"]
         }
+    }
