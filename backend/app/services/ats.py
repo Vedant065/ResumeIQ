@@ -1,51 +1,112 @@
 import re
-from collections import Counter
 
-# ==========================================================
-# TECHNICAL KEYWORDS
-# ==========================================================
+# =====================================================
+# CONFIGURATION
+# =====================================================
 
-KEYWORDS = [
+TOTAL_SCORE = 100
 
-    # Languages
-    "python","java","c","c++","c#","javascript","typescript",
+CONTACT_WEIGHT = 5
+SECTION_WEIGHT = 10
+SKILL_WEIGHT = 20
+EXPERIENCE_WEIGHT = 20
+PROJECT_WEIGHT = 20
+ACHIEVEMENT_WEIGHT = 10
+FORMAT_WEIGHT = 10
+LENGTH_WEIGHT = 5
 
-    # Web
-    "html","css","bootstrap","tailwind","react","reactjs",
-    "angular","vue","vite","nextjs",
 
-    # Backend
-    "node","nodejs","express","fastapi","flask","django",
+# =====================================================
+# CONTACT REGEX
+# =====================================================
 
-    # Database
-    "sql","mysql","postgresql","mongodb","firebase",
+EMAIL_REGEX = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+PHONE_REGEX = r"(\+?\d[\d\s\-]{9,15})"
+LINKEDIN_REGEX = r"linkedin\.com"
+GITHUB_REGEX = r"github\.com"
 
-    # Cloud
-    "aws","azure","gcp","docker","kubernetes","render",
 
-    # AI
-    "machine learning","deep learning","artificial intelligence",
-    "nlp","computer vision","tensorflow","keras","pytorch",
-    "scikit","opencv",
+# =====================================================
+# SECTION HEADINGS
+# =====================================================
 
-    # Development
-    "git","github","rest api","api","jwt","oauth","authentication",
+SECTIONS = {
+    "Education": ["education"],
+    "Skills": ["skills", "technical skills"],
+    "Projects": ["projects", "project"],
+    "Experience": [
+        "experience",
+        "internship",
+        "work experience",
+        "professional experience"
+    ],
+    "Certifications": [
+        "certification",
+        "certifications"
+    ]
+}
 
-    # CS Fundamentals
-    "data structures","algorithms","oop","operating system",
-    "computer networks","dbms",
 
-    # Soft Skills
-    "leadership","teamwork","communication",
-    "problem solving","critical thinking"
+# =====================================================
+# SKILL CATEGORIES
+# =====================================================
 
-]
+SKILL_CATEGORIES = {
 
-# ==========================================================
-# ACTION VERBS
-# ==========================================================
+    "Languages": [
+        "python",
+        "java",
+        "c",
+        "c++",
+        "javascript",
+        "typescript"
+    ],
 
-ACTION_VERBS = [
+    "Frontend": [
+        "html",
+        "css",
+        "react",
+        "tailwind",
+        "bootstrap",
+        "angular",
+        "vue"
+    ],
+
+    "Backend": [
+        "fastapi",
+        "flask",
+        "django",
+        "node",
+        "express"
+    ],
+
+    "Database": [
+        "mysql",
+        "postgresql",
+        "mongodb",
+        "firebase"
+    ],
+
+    "Cloud": [
+        "aws",
+        "azure",
+        "docker",
+        "kubernetes",
+        "render"
+    ],
+
+    "AI": [
+        "machine learning",
+        "deep learning",
+        "tensorflow",
+        "pytorch",
+        "opencv",
+        "nlp"
+    ]
+}
+
+
+ACTION_VERBS = {
 
     "developed",
     "built",
@@ -53,99 +114,39 @@ ACTION_VERBS = [
     "implemented",
     "designed",
     "optimized",
+    "engineered",
     "improved",
+    "deployed",
     "managed",
     "led",
     "integrated",
-    "engineered",
     "automated",
-    "deployed",
     "tested",
-    "analyzed",
-    "configured",
-    "maintained",
-    "debugged",
-    "collaborated",
-    "achieved"
-
-]
-
-# ==========================================================
-# COMMON RESUME SECTIONS
-# ==========================================================
-
-SECTION_KEYWORDS = {
-
-    "Education":[
-        "education",
-        "academic"
-    ],
-
-    "Skills":[
-        "skills",
-        "technical skills",
-        "core competencies"
-    ],
-
-    "Projects":[
-        "projects",
-        "project"
-    ],
-
-    "Experience":[
-        "experience",
-        "internship",
-        "work experience",
-        "professional experience"
-    ],
-
-    "Certifications":[
-        "certification",
-        "certifications",
-        "licenses"
-    ],
-
-    "Achievements":[
-        "achievements",
-        "awards"
-    ]
+    "configured"
 
 }
 
-# ==========================================================
-# CONTACT REGEX
-# ==========================================================
 
-EMAIL_REGEX = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
+# =====================================================
+# HELPERS
+# =====================================================
 
-PHONE_REGEX = r"(\+?\d[\d\s\-]{9,15})"
+def word_count(text):
 
-LINKEDIN_REGEX = r"linkedin\.com"
-
-GITHUB_REGEX = r"github\.com"
-
-PORTFOLIO_REGEX = r"(portfolio|behance|dribbble|vercel|netlify)"
-
-# ==========================================================
-# HELPER FUNCTIONS
-# ==========================================================
-
-def count_keywords(text):
-
-    text = text.lower()
-
-    found = []
-
-    for keyword in KEYWORDS:
-
-        if keyword in text:
-
-            found.append(keyword)
-
-    return found
+    return len(text.split())
 
 
-def count_action_verbs(text):
+def number_count(text):
+
+    return len(
+        re.findall(
+            r"\d+%|\d+\+|\d+",
+            text
+        )
+    )
+
+
+def action_count(text):
 
     text = text.lower()
 
@@ -153,1119 +154,577 @@ def count_action_verbs(text):
 
     for verb in ACTION_VERBS:
 
-        count += len(re.findall(r"\b"+re.escape(verb)+r"\b",text))
+        count += len(
+            re.findall(
+                r"\b"+re.escape(verb)+r"\b",
+                text
+            )
+        )
 
     return count
 
 
-def count_numbers(text):
-
-    return len(
-        re.findall(
-            r"\d+%|\d+\+|\d+\.\d+|\d+",
-            text
-        )
-    )
-
-
 def detect_sections(text):
 
-    text=text.lower()
+    text = text.lower()
 
-    detected={}
+    result = {}
 
-    for section,names in SECTION_KEYWORDS.items():
+    for section, aliases in SECTIONS.items():
 
-        detected[section]=False
+        result[section] = any(
+            alias in text
+            for alias in aliases
+        )
 
-        for name in names:
-
-            if name in text:
-
-                detected[section]=True
-                break
-
-    return detected
+    return result
 
 
-def get_word_count(text):
+def extract_skills(text):
 
-    return len(text.split())
+    text = text.lower()
+
+    found = {}
+
+    for category, skills in SKILL_CATEGORIES.items():
+
+        present = []
+
+        for skill in skills:
+
+            if re.search(
+                r"\b"+re.escape(skill)+r"\b",
+                text
+            ):
+                present.append(skill)
+
+        found[category] = present
+
+    return found
 
 
-def unique_keyword_count(text):
+def flatten_skills(skill_dict):
 
-    return len(set(count_keywords(text)))
-# ==========================================================
-# CONTACT INFORMATION SCORE (5 Marks)
-# ==========================================================
+    skills = []
 
-def score_contact_information(text):
+    for values in skill_dict.values():
+
+        skills.extend(values)
+
+    return sorted(list(set(skills)))
+
+# =====================================================
+# CONTACT SCORE (5)
+# =====================================================
+
+def score_contact(text):
 
     score = 0
-    strengths = []
     suggestions = []
 
     if re.search(EMAIL_REGEX, text):
         score += 1
-        strengths.append("Professional email address found.")
     else:
         suggestions.append("Add a professional email address.")
 
     if re.search(PHONE_REGEX, text):
         score += 1
-        strengths.append("Phone number found.")
     else:
         suggestions.append("Add a phone number.")
 
     if re.search(LINKEDIN_REGEX, text.lower()):
         score += 1
-        strengths.append("LinkedIn profile included.")
     else:
-        suggestions.append("Include your LinkedIn profile.")
+        suggestions.append("Add your LinkedIn profile.")
 
     if re.search(GITHUB_REGEX, text.lower()):
         score += 1
-        strengths.append("GitHub profile included.")
     else:
-        suggestions.append("Include your GitHub profile.")
+        suggestions.append("Add your GitHub profile.")
 
-    if re.search(PORTFOLIO_REGEX, text.lower()):
+    # Bonus for having both LinkedIn and GitHub
+    if (
+        re.search(LINKEDIN_REGEX, text.lower())
+        and
+        re.search(GITHUB_REGEX, text.lower())
+    ):
         score += 1
-        strengths.append("Portfolio website found.")
 
     return {
-        "score": score,
-        "strengths": strengths,
+        "score": min(score, CONTACT_WEIGHT),
         "suggestions": suggestions
     }
 
 
-# ==========================================================
-# RESUME STRUCTURE SCORE (15 Marks)
-# ==========================================================
+# =====================================================
+# SECTION SCORE (10)
+# =====================================================
 
-def score_resume_structure(text):
+def score_sections(text):
 
     sections = detect_sections(text)
 
     score = 0
-    strengths = []
     suggestions = []
-    analysis = []
 
-    mandatory = [
-        "Education",
-        "Skills",
-        "Projects",
-        "Experience"
-    ]
-
-    optional = [
-        "Certifications",
-        "Achievements"
-    ]
-
-    # Mandatory Sections
-    for section in mandatory:
-
-        present = sections.get(section, False)
-
-        analysis.append({
-            "name": section,
-            "present": present
-        })
+    for section, present in sections.items():
 
         if present:
-            score += 3
+            score += 2
         else:
             suggestions.append(
-                f"Missing '{section}' section."
+                f"Add {section} section."
             )
 
-    # Optional Sections
-    for section in optional:
-
-        present = sections.get(section, False)
-
-        analysis.append({
-            "name": section,
-            "present": present
-        })
-
-        if present:
-            score += 1.5
-
-    if score >= 13:
-        strengths.append(
-            "Resume contains an excellent structure."
-        )
-
-    elif score >= 10:
-        strengths.append(
-            "Resume has a good overall structure."
-        )
-
-    else:
-        suggestions.append(
-            "Organize the resume using standard ATS-friendly headings."
-        )
-
     return {
-        "score": round(score, 1),
-        "strengths": strengths,
-        "suggestions": suggestions,
-        "analysis": analysis
-    }
-
-
-# ==========================================================
-# READABILITY SCORE (5 Marks)
-# ==========================================================
-
-def score_readability(text):
-
-    score = 0
-
-    strengths = []
-
-    suggestions = []
-
-    words = get_word_count(text)
-
-    if 300 <= words <= 650:
-        score += 3
-        strengths.append(
-            "Resume length is ideal."
-        )
-
-    elif 220 <= words < 300:
-        score += 2
-
-    elif words > 650:
-        score += 1
-        suggestions.append(
-            "Reduce unnecessary content."
-        )
-
-    else:
-        score += 1
-        suggestions.append(
-            "Expand project and experience descriptions."
-        )
-
-    lines = text.splitlines()
-
-    non_empty = [
-        line.strip()
-        for line in lines
-        if line.strip()
-    ]
-
-    if len(non_empty) >= 20:
-        score += 2
-        strengths.append(
-            "Good content distribution."
-        )
-    else:
-        suggestions.append(
-            "Resume looks sparse. Add more meaningful content."
-        )
-
-    return {
-        "score": score,
-        "strengths": strengths,
+        "score": min(score, SECTION_WEIGHT),
+        "analysis": sections,
         "suggestions": suggestions
     }
-    # ==========================================================
-# SKILLS & TECHNICAL KEYWORD SCORE (20 Marks)
-# ==========================================================
+
+
+# =====================================================
+# SKILL SCORE (20)
+# =====================================================
 
 def score_skills(text):
 
-    text_lower = text.lower()
+    skills = extract_skills(text)
 
-    strengths = []
-    suggestions = []
+    categories_found = 0
 
-    keywords_found = []
-    missing_keywords = []
+    found_skills = []
 
-    # Find unique technical keywords
-    for keyword in KEYWORDS:
+    missing_categories = []
 
-        if re.search(r"\b" + re.escape(keyword) + r"\b", text_lower):
-            keywords_found.append(keyword)
+    for category, values in skills.items():
+
+        if len(values) > 0:
+
+            categories_found += 1
+
+            found_skills.extend(values)
+
         else:
-            missing_keywords.append(keyword)
 
-    unique_count = len(keywords_found)
+            missing_categories.append(category)
 
-    # -----------------------------
-    # Score Calculation
-    # -----------------------------
+    # 6 categories available
+    score = round(
+        (categories_found / len(SKILL_CATEGORIES))
+        * SKILL_WEIGHT
+    )
 
-    if unique_count >= 20:
-        score = 20
-
-    elif unique_count >= 17:
-        score = 18
-
-    elif unique_count >= 14:
-        score = 16
-
-    elif unique_count >= 11:
-        score = 14
-
-    elif unique_count >= 8:
-        score = 11
-
-    elif unique_count >= 5:
-        score = 8
-
-    elif unique_count >= 3:
-        score = 5
-
-    else:
-        score = 2
-
-    # -----------------------------
-    # Diversity Bonus
-    # -----------------------------
-
-    categories = 0
-
-    if any(k in keywords_found for k in [
-        "python","java","c","c++","c#","javascript","typescript"
-    ]):
-        categories += 1
-
-    if any(k in keywords_found for k in [
-        "react","angular","vue","html","css","tailwind"
-    ]):
-        categories += 1
-
-    if any(k in keywords_found for k in [
-        "fastapi","flask","django","node","express"
-    ]):
-        categories += 1
-
-    if any(k in keywords_found for k in [
-        "mysql","postgresql","mongodb","firebase"
-    ]):
-        categories += 1
-
-    if any(k in keywords_found for k in [
-        "aws","azure","docker","kubernetes","gcp","render"
-    ]):
-        categories += 1
-
-    if categories >= 4:
-        score += 2
-
-    score = min(score, 20)
-
-    # -----------------------------
-    # Feedback
-    # -----------------------------
-
-    if score >= 18:
-
-        strengths.append(
-            "Excellent technical skill coverage."
-        )
-
-    elif score >= 14:
-
-        strengths.append(
-            "Good technical skill set."
-        )
-
-    elif score >= 10:
-
-        strengths.append(
-            "Moderate technical skill coverage."
-        )
-
-        suggestions.append(
-            "Add more relevant technologies used in your projects."
-        )
-
-    else:
-
-        suggestions.append(
-            "Include more programming languages, frameworks, databases and tools."
-        )
-
-    return {
-
-        "score": score,
-
-        "keywords_found": keywords_found,
-
-        "missing_keywords": missing_keywords,
-
-        "strengths": strengths,
-
-        "suggestions": suggestions
-
-    }
-    # ==========================================================
-# ACTION VERB ANALYSIS
-# ==========================================================
-
-def score_action_verbs(text):
-
-    strengths = []
     suggestions = []
 
-    verb_count = count_action_verbs(text)
+    if score < 10:
 
-    if verb_count >= 15:
-
-        score = 10
-        strengths.append(
-            "Excellent use of action verbs."
-        )
-
-    elif verb_count >= 10:
-
-        score = 8
-        strengths.append(
-            "Good use of action verbs."
-        )
-
-    elif verb_count >= 6:
-
-        score = 6
-
-    elif verb_count >= 3:
-
-        score = 4
         suggestions.append(
-            "Use more action verbs like Developed, Built, Designed and Implemented."
+            "Add more technologies from different domains."
         )
 
-    else:
+    elif score < 16:
 
-        score = 2
         suggestions.append(
-            "Project descriptions should start with strong action verbs."
+            "Improve technical skill diversity."
         )
 
     return {
 
         "score": score,
 
-        "strengths": strengths,
+        "keywords": sorted(list(set(found_skills))),
+
+        "missing": missing_categories,
 
         "suggestions": suggestions
 
     }
-    # ==========================================================
-# ACHIEVEMENT SCORE
-# ==========================================================
 
-def score_achievements(text):
 
-    strengths = []
-    suggestions = []
+# =====================================================
+# COMMON FEEDBACK MERGER
+# =====================================================
 
-    numbers = count_numbers(text)
+def merge_feedback(*lists):
 
-    if numbers >= 12:
+    merged = []
 
-        score = 10
+    for item in lists:
 
-        strengths.append(
-            "Excellent quantified achievements."
-        )
+        merged.extend(item)
 
-    elif numbers >= 8:
-
-        score = 8
-
-    elif numbers >= 5:
-
-        score = 6
-
-    elif numbers >= 3:
-
-        score = 4
-
-        suggestions.append(
-            "Add more measurable achievements."
-        )
-
-    else:
-
-        score = 2
-
-        suggestions.append(
-            "Use numbers like %, users, accuracy, time saved or performance improvements."
-        )
-
-    return {
-
-        "score": score,
-
-        "strengths": strengths,
-
-        "suggestions": suggestions
-
-    }
-    # ==========================================================
-# EXPERIENCE ANALYSIS (20 Marks)
-# ==========================================================
+    return list(dict.fromkeys(merged))
+# =====================================================
+# EXPERIENCE SCORE (20)
+# =====================================================
 
 def score_experience(text):
 
     text_lower = text.lower()
 
-    strengths = []
+    score = 0
     suggestions = []
 
-    score = 0
-
-    experience_words = [
-        "experience",
-        "internship",
-        "intern",
-        "software engineer",
-        "developer",
-        "research",
-        "trainee",
-        "worked",
-        "employment",
-        "professional experience"
-    ]
-
-    has_experience = any(word in text_lower for word in experience_words)
-
-    if has_experience:
-
+    if any(word in text_lower for word in
+           ["experience", "internship", "work experience"]):
         score += 5
-
     else:
+        suggestions.append("Add internship or work experience.")
+        return {"score": score, "suggestions": suggestions}
 
-        suggestions.append(
-            "Add internship or work experience."
-        )
+    technologies = len(flatten_skills(extract_skills(text)))
 
-        return {
-            "score": score,
-            "strengths": strengths,
-            "suggestions": suggestions
-        }
-
-    # ---------------------------------------
-    # Action Verbs
-    # ---------------------------------------
-
-    verb_count = count_action_verbs(text)
-
-    if verb_count >= 10:
-
+    if technologies >= 5:
         score += 5
-        strengths.append(
-            "Experience contains strong action verbs."
-        )
-
-    elif verb_count >= 5:
-
-        score += 4
-
-    elif verb_count >= 2:
-
-        score += 2
-
-    else:
-
-        suggestions.append(
-            "Describe your work using action verbs."
-        )
-
-    # ---------------------------------------
-    # Quantified Achievements
-    # ---------------------------------------
-
-    number_count = count_numbers(text)
-
-    if number_count >= 8:
-
-        score += 5
-        strengths.append(
-            "Experience contains quantified achievements."
-        )
-
-    elif number_count >= 4:
-
-        score += 4
-
-    elif number_count >= 2:
-
-        score += 2
-
-    else:
-
-        suggestions.append(
-            "Mention achievements using numbers or percentages."
-        )
-
-    # ---------------------------------------
-    # Technologies Used
-    # ---------------------------------------
-
-    tech_count = len(count_keywords(text))
-
-    if tech_count >= 15:
-
-        score += 5
-
-    elif tech_count >= 10:
-
-        score += 4
-
-    elif tech_count >= 6:
-
+    elif technologies >= 3:
         score += 3
-
-    elif tech_count >= 3:
-
-        score += 2
-
     else:
-
         suggestions.append(
-            "Mention technologies used during internships or work."
+            "Mention technologies used in your experience."
         )
 
-    if score >= 17:
+    verbs = action_count(text)
 
-        strengths.append(
-            "Excellent professional experience."
+    if verbs >= 8:
+        score += 5
+    elif verbs >= 4:
+        score += 3
+    else:
+        suggestions.append(
+            "Use action verbs in experience."
         )
 
-    elif score >= 13:
+    numbers = number_count(text)
 
-        strengths.append(
-            "Good experience section."
+    if numbers >= 5:
+        score += 5
+    elif numbers >= 2:
+        score += 3
+    else:
+        suggestions.append(
+            "Quantify your achievements."
         )
 
     return {
-
         "score": score,
-
-        "strengths": strengths,
-
         "suggestions": suggestions
-
     }
-    # ==========================================================
-# PROJECT ANALYSIS (20 Marks)
-# ==========================================================
+
+
+# =====================================================
+# PROJECT SCORE (20)
+# =====================================================
 
 def score_projects(text):
 
     text_lower = text.lower()
 
-    strengths = []
-
+    score = 0
     suggestions = []
 
-    score = 0
+    project_mentions = text_lower.count("project")
 
-    project_keywords = [
-
-        "project",
-
-        "developed",
-
-        "built",
-
-        "created",
-
-        "implemented",
-
-        "designed"
-
-    ]
-
-    project_occurrences = sum(
-        text_lower.count(word)
-        for word in project_keywords
-    )
-
-    if project_occurrences >= 6:
-
-        score += 8
-
-    elif project_occurrences >= 4:
-
-        score += 6
-
-    elif project_occurrences >= 2:
-
-        score += 4
-
+    if project_mentions >= 2:
+        score += 5
+    elif project_mentions == 1:
+        score += 3
     else:
-
         suggestions.append(
             "Include at least two technical projects."
         )
 
-    # ---------------------------------------
-    # Technologies Used
-    # ---------------------------------------
+    technologies = len(flatten_skills(extract_skills(text)))
 
-    technologies = len(count_keywords(text))
-
-    if technologies >= 15:
-
-        score += 6
-
-    elif technologies >= 10:
-
+    if technologies >= 6:
         score += 5
-
-    elif technologies >= 6:
-
-        score += 4
-
     elif technologies >= 3:
-
-        score += 2
-
+        score += 3
     else:
-
         suggestions.append(
             "Mention technologies used in projects."
         )
 
-    # ---------------------------------------
-    # Quantified Results
-    # ---------------------------------------
-
-    numbers = count_numbers(text)
-
-    if numbers >= 6:
-
-        score += 3
-
-    elif numbers >= 3:
-
-        score += 2
-
-    # ---------------------------------------
-    # Action Verbs
-    # ---------------------------------------
-
-    verbs = count_action_verbs(text)
+    verbs = action_count(text)
 
     if verbs >= 8:
-
+        score += 5
+    elif verbs >= 4:
         score += 3
 
-    elif verbs >= 4:
+    numbers = number_count(text)
 
-        score += 2
-
-    if score >= 16:
-
-        strengths.append(
-            "Projects are well described."
-        )
-
-    elif score >= 12:
-
-        strengths.append(
-            "Good project section."
-        )
-
-    else:
-
-        suggestions.append(
-            "Improve project descriptions with achievements and technologies."
-        )
+    if numbers >= 5:
+        score += 5
+    elif numbers >= 2:
+        score += 3
 
     return {
-
         "score": score,
-
-        "strengths": strengths,
-
         "suggestions": suggestions
-
     }
-    # ==========================================================
-# ATS FORMATTING SCORE (10 Marks)
-# ==========================================================
+
+
+# =====================================================
+# ACHIEVEMENT SCORE (10)
+# =====================================================
+
+def score_achievements(text):
+
+    text_lower = text.lower()
+
+    score = 0
+
+    if ("certification" in text_lower or
+        "certifications" in text_lower):
+        score += 5
+
+    if number_count(text) >= 5:
+        score += 5
+    elif number_count(text) >= 2:
+        score += 3
+
+    return {
+        "score": score,
+        "suggestions": []
+    }
+
+
+# =====================================================
+# FORMATTING SCORE (10)
+# =====================================================
 
 def score_formatting(text):
 
-    strengths = []
+    score = 0
     suggestions = []
 
-    score = 0
-
-    words = get_word_count(text)
-
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-
-    # Resume Length
-    if 300 <= words <= 650:
-        score += 2
-        strengths.append("Resume length is ATS-friendly.")
-
-    elif 220 <= words < 300:
-        score += 1
-
-    elif words > 700:
-        suggestions.append("Resume is too lengthy.")
-
-    else:
-        suggestions.append("Resume is too short.")
-
-    # Bullet Points
-    bullet_count = len(
+    bullet_points = len(
         re.findall(r"[•\-\*]", text)
     )
 
-    if bullet_count >= 15:
+    if bullet_points >= 10:
+        score += 4
+    elif bullet_points >= 5:
         score += 2
-        strengths.append("Good use of bullet points.")
-
-    elif bullet_count >= 8:
-        score += 1
-
     else:
         suggestions.append(
-            "Use bullet points to improve readability."
+            "Use bullet points for better readability."
         )
 
-    # Contact Information
-    if re.search(EMAIL_REGEX, text):
-        score += 1
+    sections = detect_sections(text)
 
-    if re.search(PHONE_REGEX, text):
-        score += 1
-
-    if re.search(LINKEDIN_REGEX, text.lower()):
-        score += 1
-
-    if re.search(GITHUB_REGEX, text.lower()):
-        score += 1
-
-    # Section Headings
-    detected = detect_sections(text)
-
-    if sum(detected.values()) >= 5:
+    if sum(sections.values()) >= 5:
+        score += 4
+    elif sum(sections.values()) >= 3:
         score += 2
-        strengths.append("Resume uses proper section headings.")
-    else:
-        suggestions.append(
-            "Use standard ATS section headings."
-        )
+
+    paragraphs = text.count("\n\n")
+
+    if paragraphs >= 3:
+        score += 2
 
     return {
-
-        "score": min(score,10),
-
-        "strengths": strengths,
-
-        "suggestions": suggestions
-
-    }
-    # ==========================================================
-# RESUME QUALITY SCORE (10 Marks)
-# ==========================================================
-
-def score_resume_quality(text):
-
-    strengths = []
-
-    suggestions = []
-
-    score = 0
-
-    word_count = get_word_count(text)
-
-    action_verbs = count_action_verbs(text)
-
-    numbers = count_numbers(text)
-
-    technologies = len(count_keywords(text))
-
-    # Word Count
-    if 300 <= word_count <= 650:
-        score += 2
-
-    elif 220 <= word_count < 300:
-        score += 1
-
-    # Action Verbs
-    if action_verbs >= 10:
-        score += 3
-
-    elif action_verbs >= 5:
-        score += 2
-
-    elif action_verbs >= 2:
-        score += 1
-
-    # Quantified Achievements
-    if numbers >= 8:
-        score += 3
-
-    elif numbers >= 4:
-        score += 2
-
-    elif numbers >= 2:
-        score += 1
-
-    # Technology Diversity
-    if technologies >= 15:
-        score += 2
-
-    elif technologies >= 10:
-        score += 1
-
-    if score >= 8:
-
-        strengths.append(
-            "Excellent resume quality."
-        )
-
-    elif score >= 6:
-
-        strengths.append(
-            "Good resume quality."
-        )
-
-    else:
-
-        suggestions.append(
-            "Improve descriptions with achievements and technologies."
-        )
-
-    return {
-
         "score": score,
-
-        "strengths": strengths,
-
         "suggestions": suggestions
-
     }
-    # ==========================================================
-# FINAL RATING
-# ==========================================================
 
-def get_rating(score):
 
-    if score >= 90:
-        return "Excellent"
+# =====================================================
+# LENGTH SCORE (5)
+# =====================================================
 
-    elif score >= 80:
-        return "Very Good"
+def score_length(text):
 
-    elif score >= 70:
-        return "Good"
+    words = word_count(text)
 
-    elif score >= 60:
-        return "Average"
+    if 300 <= words <= 650:
+        score = 5
 
-    elif score >= 40:
-        return "Needs Improvement"
+    elif 250 <= words < 300:
+        score = 4
 
-    return "Poor"
-# ==========================================================
+    elif 180 <= words < 250:
+        score = 3
+
+    elif words > 650:
+        score = 2
+
+    else:
+        score = 1
+
+    return {
+        "score": score,
+        "suggestions": []
+    }
+# =====================================================
 # MAIN ATS FUNCTION
-# ==========================================================
+# =====================================================
 
 def calculate_ats_score(text: str):
 
-    # -----------------------------
+    # -------------------------------
     # Run all scoring modules
-    # -----------------------------
+    # -------------------------------
 
-    contact = score_contact_information(text)
+    contact = score_contact(text)
 
-    structure = score_resume_structure(text)
-
-    readability = score_readability(text)
+    sections = score_sections(text)
 
     skills = score_skills(text)
-
-    verbs = score_action_verbs(text)
-
-    achievements = score_achievements(text)
 
     experience = score_experience(text)
 
     projects = score_projects(text)
 
+    achievements = score_achievements(text)
+
     formatting = score_formatting(text)
 
-    quality = score_resume_quality(text)
+    length = score_length(text)
 
-    # -----------------------------
-    # Weighted Final Score
-    # -----------------------------
+    # -------------------------------
+    # Final Score
+    # -------------------------------
 
-    final_score = (
+    score = (
         contact["score"] +
-        structure["score"] +
-        readability["score"] +
+        sections["score"] +
         skills["score"] +
-        verbs["score"] +
-        achievements["score"] +
         experience["score"] +
         projects["score"] +
+        achievements["score"] +
         formatting["score"] +
-        quality["score"]
+        length["score"]
     )
 
-    # Raw total is 115
-    # Convert fairly to 100
+    score = min(100, score)
 
-    final_score = round((final_score / 115) * 100)
+    # -------------------------------
+    # Rating
+    # -------------------------------
 
-    # -----------------------------
-    # Soft Normalization
-    # -----------------------------
+    if score >= 90:
+        rating = "Excellent"
 
-    if final_score > 95:
-        final_score = 95
+    elif score >= 80:
+        rating = "Very Good"
 
-    elif final_score < 0:
-        final_score = 0
+    elif score >= 70:
+        rating = "Good"
 
-    # -----------------------------
-    # Merge Strengths
-    # -----------------------------
+    elif score >= 60:
+        rating = "Average"
+
+    elif score >= 50:
+        rating = "Needs Improvement"
+
+    else:
+        rating = "Poor"
+
+    # -------------------------------
+    # Strengths
+    # -------------------------------
 
     strengths = []
 
-    for module in [
-        contact,
-        structure,
-        readability,
-        skills,
-        verbs,
-        achievements,
-        experience,
-        projects,
-        formatting,
-        quality
-    ]:
+    if contact["score"] >= 4:
+        strengths.append("Professional contact information.")
 
-        strengths.extend(module.get("strengths", []))
+    if sections["score"] >= 8:
+        strengths.append("Well-structured resume.")
 
-    strengths = list(dict.fromkeys(strengths))
+    if skills["score"] >= 15:
+        strengths.append("Strong technical skill set.")
 
-    # -----------------------------
-    # Merge Suggestions
-    # -----------------------------
+    if experience["score"] >= 15:
+        strengths.append("Strong work/internship experience.")
 
-    suggestions = []
+    if projects["score"] >= 15:
+        strengths.append("Well-described technical projects.")
 
-    for module in [
-        contact,
-        structure,
-        readability,
-        skills,
-        verbs,
-        achievements,
-        experience,
-        projects,
-        formatting,
-        quality
-    ]:
+    if achievements["score"] >= 8:
+        strengths.append("Good measurable achievements.")
 
-        suggestions.extend(module.get("suggestions", []))
+    if formatting["score"] >= 8:
+        strengths.append("ATS-friendly formatting.")
 
-    suggestions = list(dict.fromkeys(suggestions))
+    if length["score"] == 5:
+        strengths.append("Ideal resume length.")
 
-    # -----------------------------
-    # Missing Keywords
-    # -----------------------------
+    # -------------------------------
+    # Suggestions
+    # -------------------------------
 
-    missing_keywords = skills["missing_keywords"][:10]
+    suggestions = merge_feedback(
 
-    # -----------------------------
-    # Rating
-    # -----------------------------
+        contact["suggestions"],
 
-    rating = get_rating(final_score)
+        sections["suggestions"],
 
-    # -----------------------------
-    # ATS Verdict
-    # -----------------------------
+        skills["suggestions"],
 
-    if final_score >= 90:
+        experience["suggestions"],
 
-        verdict = "Excellent ATS Compatibility"
+        projects["suggestions"],
 
-    elif final_score >= 80:
+        formatting["suggestions"]
 
-        verdict = "Very Good ATS Compatibility"
+    )
 
-    elif final_score >= 70:
+    # -------------------------------
+    # Section Analysis
+    # -------------------------------
 
-        verdict = "Good ATS Compatibility"
+    section_analysis = []
 
-    elif final_score >= 60:
+    for section, present in sections["analysis"].items():
 
-        verdict = "Average ATS Compatibility"
+        section_analysis.append({
 
-    else:
+            "name": section,
 
-        verdict = "Needs Improvement"
+            "present": present
 
-    # -----------------------------
-    # Return
-    # -----------------------------
+        })
+
+    # -------------------------------
+    # Result
+    # -------------------------------
 
     return {
 
-        "score": final_score,
+        "score": score,
 
         "rating": rating,
 
-        "verdict": verdict,
+        "keywords": skills["keywords"],
 
-        "keywords": skills["keywords_found"],
-
-        "missing_keywords": missing_keywords,
+        "missing_keywords": skills["missing"],
 
         "strengths": strengths,
 
         "suggestions": suggestions,
 
-        "section_analysis": structure["analysis"],
+        "section_analysis": section_analysis,
 
         "breakdown": {
 
             "Contact": contact["score"],
 
-            "Structure": structure["score"],
-
-            "Readability": readability["score"],
+            "Sections": sections["score"],
 
             "Skills": skills["score"],
-
-            "Action Verbs": verbs["score"],
-
-            "Achievements": achievements["score"],
 
             "Experience": experience["score"],
 
             "Projects": projects["score"],
 
+            "Achievements": achievements["score"],
+
             "Formatting": formatting["score"],
 
-            "Resume Quality": quality["score"]
+            "Length": length["score"]
 
         }
 
