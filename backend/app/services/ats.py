@@ -660,16 +660,6 @@ def calculate_ats_score(text: str):
 
     length = score_length(text)
 
-    print("Contact:", contact["score"])
-    print("Sections:", sections["score"])
-    print("Skills:", skills["score"])
-    print("Experience:", experience["score"])
-    print("Projects:", projects["score"])
-    print("Achievements:", achievements["score"])
-    print("Formatting:", formatting["score"])
-    print("Length:", length["score"])
-    print("Final:", score)
-
     # -------------------------------
     # Final Score
     # -------------------------------
@@ -685,6 +675,15 @@ def calculate_ats_score(text: str):
         length["score"]
     )
 
+    print("Contact:", contact["score"])
+    print("Sections:", sections["score"])
+    print("Skills:", skills["score"])
+    print("Experience:", experience["score"])
+    print("Projects:", projects["score"])
+    print("Achievements:", achievements["score"])
+    print("Formatting:", formatting["score"])
+    print("Length:", length["score"])
+    print("Final:", score)
     score = min(100, score)
 
     # -------------------------------
