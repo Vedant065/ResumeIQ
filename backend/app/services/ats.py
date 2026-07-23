@@ -1,14 +1,25 @@
 import re
 
 KEYWORDS = [
-    "python", "java", "c++", "sql", "react", "fastapi", "flask",
-    "docker", "git", "aws", "azure", "machine learning",
-    "tensorflow", "pytorch", "api", "mongodb", "mysql",
-    "html", "css", "javascript",
+    "python", "java", "c", "c++", "sql", "mysql", "mongodb",
+    "react", "reactjs", "typescript", "javascript",
+    "html", "css", "tailwind", "vite",
+    "fastapi", "flask", "django", "rest api",
+    "git", "github", "docker",
+    "aws", "azure", "cloud",
+    "machine learning", "deep learning",
+    "artificial intelligence", "nlp",
+    "tensorflow", "pytorch",
+    "api", "jwt", "authentication",
+    "problem solving", "communication",
+    "teamwork", "leadership",
+    "data structures", "algorithms",
+    "render", "postman"
 ]
 
 
 def calculate_ats_score(text: str):
+
     text_lower = text.lower()
 
     score = 0
@@ -18,26 +29,28 @@ def calculate_ats_score(text: str):
     keywords_found = []
     missing_keywords = []
 
-    # -----------------------------
-    # Contact Information (5)
-    # -----------------------------
+    # -----------------------------------
+    # CONTACT INFORMATION (10)
+    # -----------------------------------
+
     contact_score = 0
 
     if re.search(r"\S+@\S+\.\S+", text):
-        contact_score += 2
+        contact_score += 5
     else:
         suggestions.append("Add a professional email address.")
 
     if re.search(r"\+?\d[\d\s\-]{8,}", text):
-        contact_score += 3
+        contact_score += 5
     else:
         suggestions.append("Add a phone number.")
 
     score += contact_score
 
-    # -----------------------------
-    # Resume Sections (15)
-    # -----------------------------
+    # -----------------------------------
+    # SECTIONS (20)
+    # -----------------------------------
+
     sections = {
         "Education": "education" in text_lower,
         "Skills": "skills" in text_lower,
@@ -58,18 +71,19 @@ def calculate_ats_score(text: str):
         })
 
         if present:
-            section_score += 3
+            section_score += 4
         else:
             suggestions.append(f"Add a {name} section.")
 
     score += section_score
 
-    if section_score >= 12:
-        strengths.append("Well-structured resume")
+    if section_score >= 16:
+        strengths.append("Well-structured resume.")
 
-    # -----------------------------
-    # Technical Keywords (25)
-    # -----------------------------
+    # -----------------------------------
+    # KEYWORDS (30)
+    # -----------------------------------
+
     for keyword in KEYWORDS:
 
         if keyword in text_lower:
@@ -77,137 +91,155 @@ def calculate_ats_score(text: str):
         else:
             missing_keywords.append(keyword)
 
-    keyword_score = round(
-        (len(keywords_found) / len(KEYWORDS)) * 25
-    )
+    keyword_score = min(30, len(keywords_found) * 2)
 
     score += keyword_score
 
-    if keyword_score >= 18:
-        strengths.append("Good technical skill coverage")
+    if keyword_score >= 24:
+        strengths.append("Excellent technical keyword coverage.")
+    elif keyword_score >= 16:
+        strengths.append("Good technical skills.")
     else:
         suggestions.append(
-            "Include more job-relevant technical skills."
+            "Include more job-specific technical skills."
         )
 
-    # -----------------------------
-    # Experience Quality (20)
-    # -----------------------------
+    # -----------------------------------
+    # EXPERIENCE (20)
+    # -----------------------------------
+
     experience_score = 0
 
     if "experience" in text_lower:
 
-        experience_score += 8
+        experience_score += 10
 
         numbers = len(re.findall(r"\d+%|\d+\+|\d+", text))
 
-        if numbers >= 8:
-            experience_score += 12
+        if numbers >= 5:
+            experience_score += 10
             strengths.append(
-                "Experience contains measurable achievements."
+                "Experience includes quantified achievements."
             )
 
-        elif numbers >= 4:
-            experience_score += 8
+        elif numbers >= 2:
+            experience_score += 7
 
         else:
-            experience_score += 4
+            experience_score += 5
             suggestions.append(
-                "Add quantified achievements to your experience."
+                "Quantify your achievements using numbers."
             )
 
     else:
-        suggestions.append("Include work experience or internships.")
+        suggestions.append(
+            "Include internship or work experience."
+        )
 
     score += experience_score
 
-    # -----------------------------
-    # Projects Quality (10)
-    # -----------------------------
+    # -----------------------------------
+    # PROJECTS (15)
+    # -----------------------------------
+
     project_score = 0
 
-    project_count = text_lower.count("project")
+    project_count = len(
+        re.findall(
+            r"resumeiq|tokenshield|devtwin|project",
+            text_lower
+        )
+    )
 
     if project_count >= 3:
-        project_score = 10
+        project_score = 15
+
     elif project_count == 2:
-        project_score = 8
+        project_score = 12
+
     elif project_count == 1:
-        project_score = 5
+        project_score = 8
+
     else:
         suggestions.append(
-            "Add at least two technical projects."
+            "Include at least two technical projects."
         )
 
     score += project_score
 
-    # -----------------------------
-    # Resume Length (5)
-    # -----------------------------
+    # -----------------------------------
+    # RESUME LENGTH (5)
+    # -----------------------------------
+
     words = len(text.split())
 
-    if 450 <= words <= 700:
+    if 300 <= words <= 650:
+
         score += 5
 
-    elif 300 <= words < 450:
+    elif 250 <= words < 300:
+
         score += 4
 
-    elif 200 <= words < 300:
+    elif 180 <= words < 250:
+
         score += 3
         suggestions.append(
-            "Expand project descriptions and achievements."
+            "Expand project descriptions."
         )
 
-    elif words > 700:
-        score += 2
+    elif words > 650:
+
+        score += 3
         suggestions.append(
             "Reduce resume length."
         )
 
     else:
-        score += 1
+
+        score += 2
         suggestions.append(
             "Resume is too short."
         )
 
-    # -----------------------------
-    # Final Adjustment
-    # -----------------------------
+    # -----------------------------------
+    # BONUS SCORE
+    # -----------------------------------
 
-    if score > 100:
-        score = 100
+    if (
+        section_score >= 16 and
+        keyword_score >= 24 and
+        experience_score >= 15
+    ):
+        score += 5
+        strengths.append(
+            "Excellent ATS compatibility."
+        )
 
-    # Slight penalty if few keywords are found
-    if len(keywords_found) < 8:
-        score -= 5
+    # -----------------------------------
+    # FINAL SCORE
+    # -----------------------------------
 
-    # Penalty for missing critical sections
-    if not sections["Experience"]:
-        score -= 5
+    score = min(score, 100)
 
-    if not sections["Projects"]:
-        score -= 5
-
-    score = max(0, score)
-
-    # -----------------------------
-    # Rating
-    # -----------------------------
+    # -----------------------------------
+    # RATING
+    # -----------------------------------
 
     if score >= 90:
-        strengths.append("Excellent ATS compatibility")
+        strengths.append("Highly optimized for ATS.")
 
     elif score >= 75:
-        strengths.append("Good ATS compatibility")
+        strengths.append("Good ATS compatibility.")
 
     elif score >= 60:
         suggestions.append(
-            "Improve keyword optimization and quantify achievements."
+            "Improve keywords and achievements."
         )
 
     else:
         suggestions.append(
-            "Resume needs significant improvements for ATS."
+            "Resume needs significant improvement."
         )
 
     return {
