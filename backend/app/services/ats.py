@@ -638,52 +638,52 @@ def score_length(text):
 # MAIN ATS FUNCTION
 # =====================================================
 
-def calculate_ats_score(text: str):
-
-    # -------------------------------
-    # Run all scoring modules
-    # -------------------------------
-
-    contact = score_contact(text)
-
-    sections = score_sections(text)
-
-    skills = score_skills(text)
-
-    experience = score_experience(text)
-
-    projects = score_projects(text)
-
-    achievements = score_achievements(text)
-
-    formatting = score_formatting(text)
-
-    length = score_length(text)
-
-    # -------------------------------
-    # Final Score
-    # -------------------------------
-
-    score = (
-        contact["score"] +
-        sections["score"] +
-        skills["score"] +
-        experience["score"] +
-        projects["score"] +
-        achievements["score"] +
-        formatting["score"] +
-        length["score"]
-    )
-
-    print("Contact:", contact["score"])
-    print("Sections:", sections["score"])
-    print("Skills:", skills["score"])
-    print("Experience:", experience["score"])
-    print("Projects:", projects["score"])
-    print("Achievements:", achievements["score"])
-    print("Formatting:", formatting["score"])
-    print("Length:", length["score"])
-    print("Final:", score)
+    def calculate_ats_score(text: str):
+    
+        # -------------------------------
+        # Run all scoring modules
+        # -------------------------------
+    
+        contact = score_contact(text)
+    
+        sections = score_sections(text)
+    
+        skills = score_skills(text)
+    
+        experience = score_experience(text)
+    
+        projects = score_projects(text)
+    
+        achievements = score_achievements(text)
+    
+        formatting = score_formatting(text)
+    
+        length = score_length(text)
+    
+        # -------------------------------
+        # Final Score
+        # -------------------------------
+    
+        score = (
+            contact["score"] +
+            sections["score"] +
+            skills["score"] +
+            experience["score"] +
+            projects["score"] +
+            achievements["score"] +
+            formatting["score"] +
+            length["score"]
+        )
+    
+        print("Contact:", contact["score"])
+        print("Sections:", sections["score"])
+        print("Skills:", skills["score"])
+        print("Experience:", experience["score"])
+        print("Projects:", projects["score"])
+        print("Achievements:", achievements["score"])
+        print("Formatting:", formatting["score"])
+        print("Length:", length["score"])
+        print("Final:", score)
     
 
     # -------------------------------
