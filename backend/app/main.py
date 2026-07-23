@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import router   # <-- change to your actual router import
+from app.api.analyze import router
 
 app = FastAPI(title="ResumeIQ API")
 
@@ -20,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
 
 @app.get("/")
 def root():
