@@ -220,7 +220,17 @@ def calculate_ats_score(text: str):
     # FINAL SCORE
     # -----------------------------------
 
-    score = min(score, 100)
+    # Normalize score
+    if score >= 95:
+        score = 95
+    elif score >= 90:
+        score = 90
+    elif score >= 80:
+        score = 85
+    elif score >= 70:
+        score = 75
+    elif score >= 60:
+        score = 65
 
     # -----------------------------------
     # RATING
