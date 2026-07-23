@@ -145,6 +145,22 @@ def number_count(text):
         )
     )
 
+IMPACT_PATTERNS = [
+    r"\d+%",
+    r"\d+\+",
+    r"\d+\s*(users|customers|clients|downloads)",
+    r"\d+\s*(ms|sec|seconds|minutes)",
+    r"\d+\s*(x|times)"
+]
+
+def impact_count(text):
+    count = 0
+    text = text.lower()
+
+    for pattern in IMPACT_PATTERNS:
+        count += len(re.findall(pattern, text))
+
+    return count
 
 def action_count(text):
 
@@ -212,6 +228,37 @@ def flatten_skills(skill_dict):
         skills.extend(values)
 
     return sorted(list(set(skills)))
+def extract_section(text, section_names):
+    text = text.replace("\r", "")
+    lines = text.split("\n")
+
+    headings = [
+        "education",
+        "skills",
+        "projects",
+        "experience",
+        "internship",
+        "certifications",
+        "achievements"
+    ]
+
+    start = None
+    end = len(lines)
+
+    for i, line in enumerate(lines):
+        if line.strip().lower() in section_names:
+            start = i + 1
+            break
+
+    if start is None:
+        return ""
+
+    for j in range(start, len(lines)):
+        if lines[j].strip().lower() in headings:
+            end = j
+            break
+
+    return "\n".join(lines[start:end])
 
 # =====================================================
 # CONTACT SCORE (5)
@@ -289,7 +336,12 @@ def score_sections(text):
 
 def score_skills(text):
 
-    skills = extract_skills(text)
+    skills_text = extract_section(
+        text,
+        ["skills", "technical skills"]
+    )
+
+    skills = extract_skills(skills_text)
 
     categories_found = 0
 
@@ -361,7 +413,12 @@ def merge_feedback(*lists):
 
 def score_experience(text):
 
-    text_lower = text.lower()
+    experience = extract_section(
+        text,
+        ["experience", "internship", "work experience"]
+    )
+
+    text_lower = experience.lower()
 
     score = 0
     suggestions = []
@@ -373,7 +430,7 @@ def score_experience(text):
         suggestions.append("Add internship or work experience.")
         return {"score": score, "suggestions": suggestions}
 
-    technologies = len(flatten_skills(extract_skills(text)))
+    technologies = len(flatten_skills(extract_skills(experience)))
 
     if technologies >= 5:
         score += 5
@@ -384,7 +441,7 @@ def score_experience(text):
             "Mention technologies used in your experience."
         )
 
-    verbs = action_count(text)
+    verbs = action_count(experience)
 
     if verbs >= 8:
         score += 5
@@ -395,7 +452,7 @@ def score_experience(text):
             "Use action verbs in experience."
         )
 
-    numbers = number_count(text)
+    numbers = impact_count(experience)
 
     if numbers >= 5:
         score += 5
@@ -418,7 +475,12 @@ def score_experience(text):
 
 def score_projects(text):
 
-    text_lower = text.lower()
+    projects = extract_section(
+        text,
+        ["projects", "project"]
+    )
+
+    text_lower = projects.lower()
 
     score = 0
     suggestions = []
@@ -434,7 +496,7 @@ def score_projects(text):
             "Include at least two technical projects."
         )
 
-    technologies = len(flatten_skills(extract_skills(text)))
+    technologies = len(flatten_skills(extract_skills(projects)))
 
     if technologies >= 6:
         score += 5
@@ -445,14 +507,14 @@ def score_projects(text):
             "Mention technologies used in projects."
         )
 
-    verbs = action_count(text)
+    verbs = action_count(projects)
 
     if verbs >= 8:
         score += 5
     elif verbs >= 4:
         score += 3
 
-    numbers = number_count(text)
+    numbers = impact_count(projects)
 
     if numbers >= 5:
         score += 5
