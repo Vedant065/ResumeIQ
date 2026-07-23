@@ -1,8 +1,11 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-});
+export const uploadResume = async (formData: FormData) => {
+  return axios.post(
+    "http://localhost:8000/analyze",
+    formData
+  );
+};
 
 export async function uploadResume(
   file: File,
