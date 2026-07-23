@@ -1,10 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes import router   # <-- change to your actual router import
+
+app = FastAPI(title="ResumeIQ API")
+
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://resumeiq-f.onrender.com",   # your frontend
+    "https://resumeiq-f.onrender.com",
 ]
 
 app.add_middleware(
