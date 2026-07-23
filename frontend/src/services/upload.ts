@@ -1,8 +1,10 @@
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const uploadResume = async (formData: FormData) => {
   return axios.post(
-    "http://localhost:8000/analyze",
+    `${API_URL}/analyze`,
     formData
   );
 };
